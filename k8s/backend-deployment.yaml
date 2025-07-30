@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-backend
+  template:
+    metadata:
+      labels:
+        app: product-backend
+    spec:
+      containers:
+        - name: product-backend
+          image: your-image-path-here
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo-username
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo-password
+            - name: MONGO_DB
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo-database
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: product-backend
+  ports:
+    - port: 80
+      targetPort: 8080
